@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useAuth } from "./context/AuthContext";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth(); // Use the login function from AuthContext
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -20,10 +22,6 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clear previous error messages
-    setError("");
-
-    // Send form data to the API
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -36,13 +34,29 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to the referral page on successful login
-        router.push("/referrals");
+        // Use the login function from AuthContext to update the global state
+        login(data.user.role, data.user.email);
+
+        // Redirect based on role
+        if (data.user.role === "Admin") {
+          router.push("/admin");
+        } else if (data.user.role === "Registrar") {
+          router.push("/registrar");
+        } 
+        else if (data.user.role === "Finance") {
+          router.push("/finance");
+        } 
+        else if (data.user.role === "Student") {
+          router.push("/referrals");
+        } 
+        else {
+          router.push("/home");
+        }
       } else {
         setError(data.message || "Failed to log in.");
       }
     } catch (error) {
-      setError("An error occurred. Please try again. "+ error);
+      setError("An error occurred. Please try again. " + error);
     }
   };
 
@@ -65,7 +79,7 @@ export default function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="john.doe@example.com"
- className="w-full p-5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-700 dark:text-white"
+              className="w-full p-5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -81,27 +95,30 @@ export default function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
- className="w-full p-5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-700 dark:text-white"
+              className="w-full p-5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
 
-          <Button type="submit" 
-          className="w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors">
+          <Button
+            type="submit"
+            className="w-full bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
+          >
             Log In
           </Button>
+
           {/* Login Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            D&apos;nt have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-black dark:text-white hover:underline"
-            >
-              Signup
-            </Link>
-          </p>
-        </div>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              D&apos;nt have an account?{" "}
+              <Link
+                href="/signup"
+                className="text-black dark:text-white hover:underline"
+              >
+                Signup
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>

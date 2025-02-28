@@ -1,354 +1,370 @@
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react"; // Add useEffect
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+export default function ReferralPage() {
+  const router = useRouter();
+  const { id } = router.query; // Get the referral ID (UUID) from the URL
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  const [formData, setFormData] = useState({
+    title: "",
+    fullName: "",
+    address: "",
+    contact: "",
+    program: "",
+    session: "",
+    mode: "",
+    dob: "",
+    gender: "",
+    nationality: "",
+    maritalStatus: "",
+  });
 
-import { useEffect, useState } from "react";
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [referralData, setReferralData] = useState(null); // Store fetched referral data
 
-interface Referral {
-  _id: string;
-  referrerName: string;
-  referrerPhone: string;
-  referrerEmail: string;
-  referrerRelationship: string;
-  studentName: string;
-  studentPhone: string;
-  studentEmail: string;
-  admissionDetails: string;
-  referralDate: string;
-  referralStatus: string;
-  createdAt: string;
-}
-
-export default function Referrals() {
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-
+  // Fetch referral data when the component mounts or the ID changes
   useEffect(() => {
-    // Fetch referral data from the API
-    const fetchData = async () => {
+    if (!id) return; // Ensure the ID is available
+
+    const fetchReferralData = async () => {
       try {
-        const response = await fetch("/api/fetchReferrals");
+        const response = await fetch(`/api/referral/${id}`);
         if (response.ok) {
           const data = await response.json();
-          setReferrals(data);
+          setReferralData(data); // Store the fetched data
+
+          // If studentData exists, pre-fill the form
+          if (data.studentData) {
+            setFormData(data.studentData);
+          }
         } else {
-          console.error("Failed to fetch referrals.");
+          console.error("Failed to fetch referral data.");
         }
       } catch (error) {
-        console.error("Error fetching referrals:", error);
+        console.error("Error fetching referral data:", error);
+      } finally {
+        setIsLoading(false); // Set loading to false after fetching
       }
     };
 
-    fetchData();
-  }, []);
+    fetchReferralData();
+  }, [id]);
 
-  const [formData, setFormData] = useState({
-    referrerName: "",
-    referrerEmail: "",
-    referrerPhone: "",
-    referrerRelationship: "",
-    referrerRelationshipOther: "", // For "Other" option
-    studentName: "",
-    studentEmail: "",
-    studentPhone: "",
-    admissionDetails: "",
-    referralDate: "",
-    referralStatus: "pending", // Default status
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRelationshipChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      referrerRelationship: value,
-      referrerRelationshipOther:
-        value === "other" ? prev.referrerRelationshipOther : "", // Clear "Other" field if not selected
-    }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Prepare final relationship value
-    const finalRelationship =
-      formData.referrerRelationship === "other"
-        ? formData.referrerRelationshipOther
-        : formData.referrerRelationship;
-
-    const referralData = {
-      referrerName: formData.referrerName,
-      referrerEmail: formData.referrerEmail,
-      referrerPhone: formData.referrerPhone,
-      referrerRelationship: finalRelationship,
-      studentName: formData.studentName,
-      studentPhone: formData.studentPhone,
-      studentEmail: formData.studentEmail,
-      admissionDetails: formData.admissionDetails,
-      referralDate: formData.referralDate,
-      referralStatus: formData.referralStatus,
-    };
-
     try {
-      // Send form data to the API endpoint
-      const response = await fetch("/api/referrals", {
+      // Send the form data to the backend
+      const response = await fetch(`/api/referral/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(referralData),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        console.log("Referral submitted successfully!");
-        alert("Referral submitted successfully!");
+        alert("Data submitted successfully!");
       } else {
-        const errorResponse = await response.json(); // Log the error response
-        console.error("Failed to submit referral:", errorResponse);
-        alert(`Failed to submit referral: ${errorResponse.message}`); // Use errorResponse here
+        const errorData = await response.json();
+        alert(`Failed to submit data: ${errorData.message}`);
       }
     } catch (error) {
-      console.error("Error submitting referral:", error);
-      alert("Error submitting referral.");
+      console.error("Error submitting data:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
+  if (isLoading) {
+    return <div className="p-6 text-center">Loading...</div>; // Show loading state
+  }
+
+  if (!referralData) {
+    return <div className="p-6 text-center">Referral not found.</div>; // Handle case where referral data is not found
+  }
+
   return (
-    <div className="p-6 min-h-screen dark:bg-gray-900 flex flex-col lg:flex-row gap-8 px-4 sm:px-8">
-      {/* Form Section */}
-      <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Referral Management</h1>
+    <div className="p-6 min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
+        {/* Left Column - Form */}
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full md:w-1/2">
+          <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">Student Referral Form</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Referrer Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Title */}
             <div>
-              <label htmlFor="referrerName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Referrer&apos;s Name
-              </label>
-              <Input
-                type="text"
-                id="referrerName"
-                name="referrerName"
-                value={formData.referrerName}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="referrerPhone" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Referrer&apos;s Phone
-              </label>
-              <Input
-                type="text"
-                id="referrerPhone"
-                name="referrerPhone"
-                value={formData.referrerPhone}
-                onChange={handleChange}
-                placeholder="05421789561"
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="referrerEmail" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Referrer&apos;s Email
-              </label>
-              <Input
-                type="email"
-                id="referrerEmail"
-                name="referrerEmail"
-                value={formData.referrerEmail}
-                onChange={handleChange}
-                placeholder="john.doe@example.com"
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="referrerRelationship" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Relationship to Student
+              <label htmlFor="title" className="block text-sm font-medium mb-2">
+                Title
               </label>
               <Select
-                value={formData.referrerRelationship}
-                onValueChange={handleRelationshipChange}
+                value={formData.title}
+                onValueChange={(value) => handleSelectChange("title", value)}
                 required
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Relationship" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Title" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="parent">Parent</SelectItem>
-                  <SelectItem value="teacher">Teacher</SelectItem>
-                  <SelectItem value="friend">Friend</SelectItem>
+                  <SelectItem value="mr">Mr</SelectItem>
+                  <SelectItem value="mrs">Mrs</SelectItem>
+                  <SelectItem value="dr">Dr</SelectItem>
+                  <SelectItem value="ms">Ms</SelectItem>
+                  <SelectItem value="prof">Prof</SelectItem>
+                  <SelectItem value="rev">Rev</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
-
-              {formData.referrerRelationship === "other" && (
-                <div className="mt-2">
-                  <Input
-                    type="text"
-                    id="referrerRelationshipOther"
-                    name="referrerRelationshipOther"
-                    value={formData.referrerRelationshipOther}
-                    onChange={handleChange}
-                    placeholder="Specify relationship"
-                    className="w-full"
-                    required
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Student Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="studentName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Student Name
-              </label>
-              <Input
-                type="text"
-                id="studentName"
-                name="studentName"
-                value={formData.studentName}
-                onChange={handleChange}
-                placeholder="Jane Smith"
-                className="w-full"
-                required
-              />
             </div>
 
-            <div>
-              <label htmlFor="studentEmail" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Student Email
-              </label>
-              <Input
-                type="email"
-                id="studentEmail"
-                name="studentEmail"
-                value={formData.studentEmail}
-                onChange={handleChange}
-                placeholder="tsatsuc@gmail.com"
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="studentPhone" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Student Phone
-              </label>
-              <Input
-                type="text"
-                id="studentPhone"
-                name="studentPhone"
-                value={formData.studentPhone}
-                onChange={handleChange}
-                placeholder="0542178896"
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="admissionDetails" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Admission Details
-              </label>
-              <Input
-                type="text"
-                id="admissionDetails"
-                name="admissionDetails"
-                value={formData.admissionDetails}
-                onChange={handleChange}
-                placeholder="e.g., Applied for Computer Science"
-                className="w-full"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Referral Date */}
-          <div>
-            <label htmlFor="referralDate" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Referral Date
-            </label>
+            {/* Full Name */}
             <Input
-              type="date"
-              id="referralDate"
-              name="referralDate"
-              value={formData.referralDate}
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={formData.fullName}
               onChange={handleChange}
-              className="w-full"
               required
             />
+
+            {/* Address */}
+            <Input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+            />
+
+            {/* Contact Details */}
+            <Input
+              type="text"
+              name="contact"
+              placeholder="Contact Details"
+              value={formData.contact}
+              onChange={handleChange}
+              required
+            />
+
+            {/* Program Applied For
+            <Input
+              type="text"
+              name="program"
+              placeholder="Program Applied For"
+              value={formData.program}
+              onChange={handleChange}
+              required
+            /> */}
+
+<div>
+              <label htmlFor="program" className="block text-sm font-medium mb-2">
+                Program
+              </label>
+              <Select
+                value={formData.program}
+                onValueChange={(value) => handleSelectChange("program", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select program" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Accounting">Accounting</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Human Resource Management">Human Resource Management</SelectItem>
+                  <SelectItem value="Bsc Computer Science">Bsc Computer Science</SelectItem>
+                  <SelectItem value="Bsc Information & Communication Technology">Bsc Information & Communication Technology</SelectItem>
+                  <SelectItem value="Mphil Strategic Management">Mphil Strategic Management</SelectItem>
+                  <SelectItem value="Msc Strategic Management">Msc Strategic Management</SelectItem>
+                  <SelectItem value="Msc Accounting & Finance">Msc Accounting & Finance</SelectItem>
+                </SelectContent>
+                </Select>
+            </div>
+
+            {/* Session */}
+            <div>
+              <label htmlFor="session" className="block text-sm font-medium mb-2">
+                Session
+              </label>
+              <Select
+                value={formData.session}
+                onValueChange={(value) => handleSelectChange("session", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Session" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="evening">Evening</SelectItem>
+                  <SelectItem value="weekend">Weekend</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Mode */}
+            <div>
+              <label htmlFor="mode" className="block text-sm font-medium mb-2">
+                Mode
+              </label>
+              <Select
+                value={formData.mode}
+                onValueChange={(value) => handleSelectChange("mode", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="diploma">Diploma</SelectItem>
+                  <SelectItem value="hnd">HND</SelectItem>
+                  <SelectItem value="wassce">WASSCE</SelectItem>
+                  <SelectItem value="sssce">SSSCE</SelectItem>
+                  <SelectItem value="gbce">GBCE</SelectItem>
+                  <SelectItem value="abce">ABCE</SelectItem>
+                  <SelectItem value="degree">Degree</SelectItem>
+                  <SelectItem value="mature">Mature</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date of Birth */}
+            <label htmlFor="dob" className="block text-sm font-medium mb-2">
+            Date of Birth
+              </label>
+            <Input
+              type="date"
+              name="dob"
+              value={formData.dob}
+              onChange={handleChange}
+              required
+            />
+
+            {/* Gender */}
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium mb-2">
+                Gender
+              </label>
+              <Select
+                value={formData.gender}
+                onValueChange={(value) => handleSelectChange("gender", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Nationality */}
+            <label htmlFor="nationality" className="block text-sm font-medium mb-2">
+            Nationality
+              </label>
+            <Input
+              type="text"
+              name="nationality"
+              placeholder="Nationality"
+              value={formData.nationality}
+              onChange={handleChange}
+              required
+            />
+
+            {/* Marital Status */}
+            <div>
+              <label htmlFor="maritalStatus" className="block text-sm font-medium mb-2">
+                Marital Status
+              </label>
+              <Select
+                value={formData.maritalStatus}
+                onValueChange={(value) => handleSelectChange("maritalStatus", value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Marital Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Submit Button */}
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              Submit
+            </Button>
+          </form>
+        </div>
+
+        {/* Right Column - Preview Card */}
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full md:w-1/2">
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">Preview</h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">Title</h3>
+              <p>{formData.title}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Full Name</h3>
+              <p>{formData.fullName}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Address</h3>
+              <p>{formData.address}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Contact Details</h3>
+              <p>{formData.contact}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Program Applied For</h3>
+              <p>{formData.program}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Session</h3>
+              <p>{formData.session}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Mode</h3>
+              <p>{formData.mode}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Date of Birth</h3>
+              <p>{formData.dob}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Gender</h3>
+              <p>{formData.gender}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Nationality</h3>
+              <p>{formData.nationality}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Marital Status</h3>
+              <p>{formData.maritalStatus}</p>
+            </div>
           </div>
-
-          {/* Submit Button */}
-          <Button type="submit" 
-           className="w-full p-5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-700 dark:text-white">
-            Submit Referral
-          </Button>
-        </form>
-      </div>
-
-      {/* Table Section */}
-      <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">History</h1>
-
-        <div className="overflow-x-auto">
-          <Table>
-            <TableCaption className="text-gray-500 dark:text-gray-400">A list of recent referrals.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Student Name</TableHead>
-                <TableHead>Referrer Name</TableHead>
-                <TableHead className="text-right">Referral Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {referrals.map((referral, index) => (
-                <TableRow key={referral._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <TableCell className="font-medium">SRS{index + 1}</TableCell>
-                  <TableCell>{referral.referralStatus}</TableCell>
-                  <TableCell>{referral.studentName}</TableCell>
-                  <TableCell>{referral.referrerName}</TableCell>
-                  <TableCell className="text-right">
-                    {new Date(referral.referralDate).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </div>
       </div>
     </div>

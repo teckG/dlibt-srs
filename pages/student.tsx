@@ -27,7 +27,7 @@ export default function StudentsDashboard() {
       <h1 className="text-2xl font-bold mb-6">Students Dashboard</h1>
 
       {/* Biographic Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <Input
           type="text"
           name="name"
