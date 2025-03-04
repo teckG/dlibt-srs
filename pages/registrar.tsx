@@ -17,9 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-
 import { Input } from "@/components/ui/input"; // For filter input
+import { Loader2, ChevronUp, ChevronDown, Search } from "lucide-react"; // Import icons for loading and sorting
 
 // Define the type for a referral
 interface Referral {
@@ -40,23 +39,18 @@ interface Referral {
     nationality: string;
     maritalStatus: string;
   };
-  [key: string]: any; 
+  [key: string]: any;
 }
-
-
-
-
 
 export default function RegistrarDashboard() {
   const [referrals, setReferrals] = useState<Referral[]>([]); // State to store referrals
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(""); // Error state
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const [itemsPerPage, setItemsPerPage] = useState(0); // Items per page
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Items per page
   const [filter, setFilter] = useState(""); // Filter state
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null); // Sort state
 
-  
   // Fetch referrals data from MongoDB
   useEffect(() => {
     const fetchReferrals = async () => {
@@ -65,7 +59,6 @@ export default function RegistrarDashboard() {
         if (response.ok) {
           const data = await response.json();
           setReferrals(data); // Set the fetched data
-          setItemsPerPage(5);
         } else {
           setError("Failed to fetch referrals.");
         }
@@ -146,7 +139,11 @@ export default function RegistrarDashboard() {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   if (loading) {
-    return <div className="p-6">Loading...</div>; // Show loading state
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    ); // Show loading state
   }
 
   if (error) {
@@ -154,131 +151,133 @@ export default function RegistrarDashboard() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Registrar Dashboard</h1>
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+        Registrar Dashboard
+      </h1>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      {/* Pending Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Pending
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">
-            {referrals.filter((r) => r.referralStatus === "pending").length}
-          </p>
-        </CardContent>
-      </Card>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Pending
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">
+              {referrals.filter((r) => r.referralStatus === "pending").length}
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* In Progress Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            In Progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">
-            {referrals.filter((r) => r.referralStatus === "inProgress").length}
-          </p>
-        </CardContent>
-      </Card>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              In Progress
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">
+              {referrals.filter((r) => r.referralStatus === "inProgress").length}
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Admitted Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Admitted
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">
-            {referrals.filter((r) => r.referralStatus === "admitted").length}
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Admitted
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">
+              {referrals.filter((r) => r.referralStatus === "admitted").length}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Filter and Sort Section */}
       <div className="flex gap-4 mb-6">
-        <Input
-          type="text"
-          placeholder="Filter by student name"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="w-1/2"
-        />
-        <Button onClick={() => handleSort("studentName")}>
-          Sort by Student Name {sortConfig?.direction === "ascending" ? "↑" : "↓"}
+        <div className="relative w-1/2">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Filter by student name"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Button
+          onClick={() => handleSort("studentName")}
+          className="flex items-center gap-2"
+        >
+          Sort by Student Name
+          {sortConfig?.direction === "ascending" ? <ChevronUp /> : <ChevronDown />}
         </Button>
       </div>
 
       {/* Referrals Table */}
-      <Table>
-        <TableCaption>List of Referrals</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Student Name</TableHead>
-            <TableHead>Referrer</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentReferrals.map((referral) => (
-            <TableRow key={referral.referralId}>
-              <TableCell>{referral.studentName}</TableCell>
-              <TableCell>{referral.referrerName}</TableCell>
-              <TableCell>
-                {/* Status with styling */}
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    referral.referralStatus === "pending"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : referral.referralStatus === "inProgress"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {referral.referralStatus}
-                </span>
-              </TableCell>
-              <TableCell>
-                {/* Dropdown to change status */}
-                <Select
-                  value={referral.referralStatus}
-                  onValueChange={(value) => handleStatusChange(referral.referralId, value)}
-                >
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Select Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="inProgress">In Progress</SelectItem>
-                    <SelectItem value="admitted">Admitted</SelectItem>
-                  </SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell>
-                {/* Button to view referral details */}
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // Navigate to referral details page
-                    window.location.href = `/referral/${referral.referralId}`;
-                  }}
-                >
-                  View Details
-                </Button>
-              </TableCell>
+      <Card className="hover:shadow-lg transition-shadow p-5">
+        <Table>
+          <TableCaption>List of Referrals</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Student Name</TableHead>
+              <TableHead>Referrer</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {currentReferrals.map((referral) => (
+              <TableRow key={referral.referralId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <TableCell>{referral.studentName}</TableCell>
+                <TableCell>{referral.referrerName}</TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded text-sm ${
+                      referral.referralStatus === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : referral.referralStatus === "inProgress"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {referral.referralStatus}
+                  </span>
+                </TableCell>
+                <TableCell className="flex gap-2">
+                  <Select
+                    value={referral.referralStatus}
+                    onValueChange={(value) => handleStatusChange(referral.referralId, value)}
+                  >
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="inProgress">In Progress</SelectItem>
+                      <SelectItem value="admitted">Admitted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Navigate to referral details page
+                      window.location.href = `/referral/${referral.referralId}`;
+                    }}
+                  >
+                    View Details
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* Pagination */}
       <div className="flex justify-center mt-6">

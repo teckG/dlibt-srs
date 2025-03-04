@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { User, Menu, X } from "lucide-react"; // Import icons
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function Navbar() {
   const router = useRouter();
   const { userRole, isLoading, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null); // Ref for the menu
 
   const handleLogout = () => {
     logout();
@@ -27,6 +28,20 @@ export function Navbar() {
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
+
+  // Close the menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Show a loading indicator while initializing
   if (isLoading) {
@@ -84,15 +99,16 @@ export function Navbar() {
 
         {/* Navigation links */}
         <div
+          ref={menuRef} // Attach ref to the menu
           className={`${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 lg:w-auto bg-gradient-to-r from-blue-600 to-blue-800 dark:from-gray-800 dark:to-gray-900 shadow-lg lg:shadow-none lg:bg-transparent p-4 lg:p-0 transition-transform duration-300 ease-in-out z-50`}
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 space-y-2 lg:space-y-0">
             {/* Public Links */}
             <Link
               href="/home"
-              className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+              className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
               onClick={handleLinkClick}
             >
               🏠 Home
@@ -103,42 +119,35 @@ export function Navbar() {
               <>
                 <Link
                   href="/dashboard"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   📊 Dashboard
                 </Link>
                 <Link
                   href="/referrals"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   🔗 Referrals
                 </Link>
                 <Link
                   href="/reports"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   📈 Reports
                 </Link>
                 <Link
-                  href="/finance"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
-                  onClick={handleLinkClick}
-                >
-                  💰 Finance
-                </Link>
-                <Link
                   href="/admin"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   🛠️ Admin
                 </Link>
                 <Link
                   href="/registrar"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   📚 Registrar
@@ -149,7 +158,7 @@ export function Navbar() {
             {userRole === "Registrar" && (
               <Link
                 href="/registrar"
-                className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                 onClick={handleLinkClick}
               >
                 📚 Registrar
@@ -159,7 +168,7 @@ export function Navbar() {
             {(userRole === "Admin" || userRole === "Finance") && (
               <Link
                 href="/finance"
-                className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                 onClick={handleLinkClick}
               >
                 💰 Finance
@@ -169,7 +178,7 @@ export function Navbar() {
             {userRole === "Student" && (
               <Link
                 href="/referrals"
-                className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                 onClick={handleLinkClick}
               >
                 🔗 Referrals
@@ -180,7 +189,7 @@ export function Navbar() {
             {userRole && (
               <Link
                 href="/notifications"
-                className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                 onClick={handleLinkClick}
               >
                 🔔 Notifications
@@ -192,14 +201,14 @@ export function Navbar() {
               <>
                 <Link
                   href="/signup"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   ✍️ Signup
                 </Link>
                 <Link
                   href="/login"
-                  className="block px-2 py-1 lg:p-0 text-white hover:text-gray-200 transition-colors"
+                  className="block px-2 py-2 lg:p-0 text-white hover:text-gray-200 transition-colors"
                   onClick={handleLinkClick}
                 >
                   🔐 Login

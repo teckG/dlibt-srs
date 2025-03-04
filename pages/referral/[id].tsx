@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react"; // Add useEffect
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react"; // Import icons for loading
 
 export default function ReferralPage() {
   const router = useRouter();
@@ -88,7 +89,11 @@ export default function ReferralPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6 text-center">Loading...</div>; // Show loading state
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    ); // Show loading state
   }
 
   if (!referralData) {
@@ -117,13 +122,13 @@ export default function ReferralPage() {
                   <SelectValue placeholder="Select Title" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mr">Mr</SelectItem>
-                  <SelectItem value="mrs">Mrs</SelectItem>
-                  <SelectItem value="dr">Dr</SelectItem>
-                  <SelectItem value="ms">Ms</SelectItem>
-                  <SelectItem value="prof">Prof</SelectItem>
-                  <SelectItem value="rev">Rev</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Mr">Mr</SelectItem>
+                  <SelectItem value="Mrs">Mrs</SelectItem>
+                  <SelectItem value="Dr">Dr</SelectItem>
+                  <SelectItem value="Ms">Ms</SelectItem>
+                  <SelectItem value="Prof">Prof</SelectItem>
+                  <SelectItem value="Rev">Rev</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -158,17 +163,8 @@ export default function ReferralPage() {
               required
             />
 
-            {/* Program Applied For
-            <Input
-              type="text"
-              name="program"
-              placeholder="Program Applied For"
-              value={formData.program}
-              onChange={handleChange}
-              required
-            /> */}
-
-<div>
+            {/* Program */}
+            <div>
               <label htmlFor="program" className="block text-sm font-medium mb-2">
                 Program
               </label>
@@ -178,19 +174,19 @@ export default function ReferralPage() {
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select program" />
+                  <SelectValue placeholder="Select Program" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Accounting">Accounting</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Human Resource Management">Human Resource Management</SelectItem>
+                  <SelectItem value="Bsc Accounting">Bsc Accounting</SelectItem>
+                  <SelectItem value="Bsc Marketing">Bsc Marketing</SelectItem>
+                  <SelectItem value="Bsc Human Resource Management">Bsc Human Resource Management</SelectItem>
                   <SelectItem value="Bsc Computer Science">Bsc Computer Science</SelectItem>
                   <SelectItem value="Bsc Information & Communication Technology">Bsc Information & Communication Technology</SelectItem>
                   <SelectItem value="Mphil Strategic Management">Mphil Strategic Management</SelectItem>
                   <SelectItem value="Msc Strategic Management">Msc Strategic Management</SelectItem>
                   <SelectItem value="Msc Accounting & Finance">Msc Accounting & Finance</SelectItem>
                 </SelectContent>
-                </Select>
+              </Select>
             </div>
 
             {/* Session */}
@@ -207,9 +203,9 @@ export default function ReferralPage() {
                   <SelectValue placeholder="Select Session" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="regular">Regular</SelectItem>
-                  <SelectItem value="evening">Evening</SelectItem>
-                  <SelectItem value="weekend">Weekend</SelectItem>
+                  <SelectItem value="Regular">Regular</SelectItem>
+                  <SelectItem value="Evening">Evening</SelectItem>
+                  <SelectItem value="Weekend">Weekend</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -228,23 +224,23 @@ export default function ReferralPage() {
                   <SelectValue placeholder="Select Mode" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="diploma">Diploma</SelectItem>
-                  <SelectItem value="hnd">HND</SelectItem>
-                  <SelectItem value="wassce">WASSCE</SelectItem>
-                  <SelectItem value="sssce">SSSCE</SelectItem>
-                  <SelectItem value="gbce">GBCE</SelectItem>
-                  <SelectItem value="abce">ABCE</SelectItem>
-                  <SelectItem value="degree">Degree</SelectItem>
-                  <SelectItem value="mature">Mature</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Diploma">Diploma</SelectItem>
+                  <SelectItem value="HND">HND</SelectItem>
+                  <SelectItem value="WASSCE">WASSCE</SelectItem>
+                  <SelectItem value="SSSCE">SSSCE</SelectItem>
+                  <SelectItem value="GBCE">GBCE</SelectItem>
+                  <SelectItem value="ABCE">ABCE</SelectItem>
+                  <SelectItem value="Degree">Degree</SelectItem>
+                  <SelectItem value="Mature">Mature</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date of Birth */}
             <label htmlFor="dob" className="block text-sm font-medium mb-2">
-            Date of Birth
-              </label>
+              Date of Birth
+            </label>
             <Input
               type="date"
               name="dob"
@@ -267,16 +263,16 @@ export default function ReferralPage() {
                   <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Nationality */}
             <label htmlFor="nationality" className="block text-sm font-medium mb-2">
-            Nationality
-              </label>
+              Nationality
+            </label>
             <Input
               type="text"
               name="nationality"
@@ -300,11 +296,11 @@ export default function ReferralPage() {
                   <SelectValue placeholder="Select Marital Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Single</SelectItem>
-                  <SelectItem value="married">Married</SelectItem>
-                  <SelectItem value="divorced">Divorced</SelectItem>
-                  <SelectItem value="widowed">Widowed</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Married">Married</SelectItem>
+                  <SelectItem value="Divorced">Divorced</SelectItem>
+                  <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>

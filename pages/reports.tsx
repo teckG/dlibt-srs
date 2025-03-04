@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import * as XLSX from "xlsx"; // For Excel export
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer"; // For PDF export
+import {  FileText, FileSpreadsheet, Loader2 } from "lucide-react"; // Import icons
 
 // Define the type for a referral
 interface Referral {
@@ -100,7 +101,11 @@ export default function Reports() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading...</div>; // Show loading state
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    ); // Show loading state
   }
 
   if (error) {
@@ -108,17 +113,22 @@ export default function Reports() {
   }
 
   return (
-    <div className="p-6 min-h-screen dark:bg-gray-900">
+    <div className="p-6 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <h1 className="text-2xl font-bold mb-6 dark:text-white">Reports Dashboard</h1>
 
       {/* Download Buttons */}
-      <div className="flex gap-4 mb-6">
-        <Button onClick={exportToExcel}>Download as Excel</Button>
+      <div className="flex flex-wrap gap-4 mb-6">
+        <Button onClick={exportToExcel} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+          <FileSpreadsheet className="h-4 w-4" />
+          Download as Excel
+        </Button>
         <PDFDownloadLink
           document={<MyDocument referrals={referrals} />}
           fileName="referrals.pdf"
         >
           {({ loading }) => (
-            <Button disabled={loading}>
+            <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700" disabled={loading}>
+              <FileText className="h-4 w-4" />
               {loading ? "Generating PDF..." : "Download as PDF"}
             </Button>
           )}
@@ -126,9 +136,9 @@ export default function Reports() {
       </div>
 
       {/* Reports Table */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Referrals Report</CardTitle>
+          <CardTitle className="text-xl font-bold">Referrals Report</CardTitle>
         </CardHeader>
         <CardContent>
           <Table id="reports-table">
@@ -143,7 +153,7 @@ export default function Reports() {
             </TableHeader>
             <TableBody>
               {referrals.map((referral) => (
-                <TableRow key={referral.referralId}>
+                <TableRow key={referral.referralId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <TableCell>{referral.studentName}</TableCell>
                   <TableCell>{referral.referralStatus}</TableCell>
                   <TableCell>{referral.studentData?.gender || "N/A"}</TableCell>
@@ -156,11 +166,11 @@ export default function Reports() {
       </Card>
 
       {/* Additional Reports */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Referrals by Status */}
         <Card>
           <CardHeader>
-            <CardTitle>Referrals by Status</CardTitle>
+            <CardTitle className="text-lg font-bold">Referrals by Status</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -187,7 +197,7 @@ export default function Reports() {
         {/* Referrals by Gender */}
         <Card>
           <CardHeader>
-            <CardTitle>Referrals by Gender</CardTitle>
+            <CardTitle className="text-lg font-bold">Referrals by Gender</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -214,7 +224,7 @@ export default function Reports() {
         {/* Referrals by Program */}
         <Card>
           <CardHeader>
-            <CardTitle>Referrals by Program</CardTitle>
+            <CardTitle className="text-lg font-bold">Referrals by Program</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>

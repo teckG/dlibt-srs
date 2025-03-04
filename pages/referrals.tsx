@@ -377,9 +377,9 @@ export default function Referrals() {
                   <SelectValue placeholder="Select Course" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Accounting">Accounting</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Human Resource Management">Human Resource Management</SelectItem>
+                <SelectItem value="Bsc Accounting">Bsc Accounting</SelectItem>
+                  <SelectItem value="Bsc Marketing">Bsc Marketing</SelectItem>
+                  <SelectItem value="Bsc Human Resource Management">Bsc Human Resource Management</SelectItem>
                   <SelectItem value="Bsc Computer Science">Bsc Computer Science</SelectItem>
                   <SelectItem value="Bsc Information & Communication Technology">Bsc Information & Communication Technology</SelectItem>
                   <SelectItem value="Mphil Strategic Management">Mphil Strategic Management</SelectItem>

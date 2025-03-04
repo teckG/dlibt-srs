@@ -10,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { User2Icon, UserCheck } from "lucide-react";
+import { User2Icon, UserCheck, Users, BookOpen, } from "lucide-react"; // Import icons
+import { Skeleton } from "@/components/ui/skeleton"; // For loading states
 
 // Define the type for a referral
 interface Referral {
@@ -84,7 +85,20 @@ export default function DashboardPage() {
   const unregisteredReferrals = referrals.filter((referral) => !referral.studentData);
 
   if (loading) {
-    return <div className="p-6">Loading...</div>; // Show loading state
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-32 rounded-lg" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Skeleton className="h-96 rounded-lg" />
+          <Skeleton className="h-96 rounded-lg" />
+        </div>
+        <Skeleton className="h-96 rounded-lg" />
+      </div>
+    ); // Show loading state
   }
 
   if (error) {
@@ -92,44 +106,49 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <Card className="bg-green-400">
-          <CardHeader className="flex flex-row gap-2">
-           <User2Icon /> <CardTitle>Total Referrals</CardTitle>
+        <Card className="bg-gradient-to-r from-green-400 to-green-500">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <User2Icon className="h-6 w-6" />
+            <CardTitle className="text-lg">Total Referrals</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{totalReferrals}</p>
           </CardContent>
         </Card>
-        <Card className="bg-yellow-400">
-        <CardHeader className="flex flex-row gap-2">
-           <UserCheck /> <CardTitle>Total Admitted</CardTitle>
+        <Card className="bg-gradient-to-r from-yellow-400 to-yellow-500">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <UserCheck className="h-6 w-6" />
+            <CardTitle className="text-lg">Total Admitted</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{admitted}</p>
           </CardContent>
         </Card>
-        <Card className="bg-blue-300">
-          <CardHeader>
-            <CardTitle>Female Referrals - (Registered)</CardTitle>
+        <Card className="bg-gradient-to-r from-blue-300 to-blue-400">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <Users className="h-6 w-6" />
+            <CardTitle className="text-lg">Female Referrals</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{femaleReferrals}</p>
           </CardContent>
         </Card>
-        <Card className="bg-red-400">
-          <CardHeader>
-            <CardTitle>Male Referrals - (Registered)</CardTitle>
+        <Card className="bg-gradient-to-r from-red-400 to-red-500">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <Users className="h-6 w-6" />
+            <CardTitle className="text-lg">Male Referrals</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{maleReferrals}</p>
           </CardContent>
         </Card>
-        <Card className="bg-purple-300">
-          <CardHeader>
-            <CardTitle>Programs</CardTitle>
+        <Card className="bg-gradient-to-r from-purple-300 to-purple-400">
+          <CardHeader className="flex flex-row items-center gap-2">
+            <BookOpen className="h-6 w-6" />
+            <CardTitle className="text-lg">Programs</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{Object.keys(programCounts).length - 1}</p>
@@ -142,7 +161,7 @@ export default function DashboardPage() {
         {/* Program Breakdown Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Referrals by Program</CardTitle>
+            <CardTitle className="text-xl font-bold">Referrals by Program</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
@@ -160,7 +179,7 @@ export default function DashboardPage() {
         {/* Gender Breakdown Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Referrals by Gender</CardTitle>
+            <CardTitle className="text-xl font-bold">Referrals by Gender</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
@@ -184,7 +203,7 @@ export default function DashboardPage() {
       {/* Registered Students Table */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Registered Students</CardTitle>
+          <CardTitle className="text-xl font-bold">Registered Students</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -201,7 +220,7 @@ export default function DashboardPage() {
             </TableHeader>
             <TableBody>
               {registeredReferrals.map((referral) => (
-                <TableRow key={referral.referralId}>
+                <TableRow key={referral.referralId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <TableCell>{referral.studentData?.fullName}</TableCell>
                   <TableCell>{referral.studentData?.contact}</TableCell>
                   <TableCell>{referral.studentData?.address}</TableCell>
@@ -218,7 +237,7 @@ export default function DashboardPage() {
       {/* Unregistered Students Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Unregistered Students</CardTitle>
+          <CardTitle className="text-xl font-bold">Unregistered Students</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -234,7 +253,7 @@ export default function DashboardPage() {
             </TableHeader>
             <TableBody>
               {unregisteredReferrals.map((referral) => (
-                <TableRow key={referral.referralId}>
+                <TableRow key={referral.referralId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <TableCell>{referral.studentName}</TableCell>
                   <TableCell>{referral.referrerName}</TableCell>
                   <TableCell>{referral.referralStatus}</TableCell>
